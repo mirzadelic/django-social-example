@@ -1,0 +1,148 @@
+{% load static %}
+<html ng-app="App">
+<head>
+	<meta charset="UTF-8">
+	<title>Home</title>
+	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+	<script>
+		var base_url = 'http://{{ request.get_host }}/';
+	</script>
+</head>
+<body ng-controller="AppCtrl">
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+			</div>
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#" data-toggle="modal" data-target="#addModal">Add new person</a></li>
+					<li><a href="{% url 'load-data' %}">Reload data from file</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	{% verbatim %}
+	<div class="container">
+		<div class="col-md-4">
+			<div class="well">
+				<h3>Persons:</h3>
+				<select class="form-control" ng-model="person_id">
+					<option ng-repeat="p in persons" value="{{ p.id }}">{{ p.full_name }}</option>
+				</select>
+				<hr>
+				<h3>Search:</h3>
+				<form ng-submit="filterPersons(firstName)">
+					<div class="input-group">
+						<input type="text" class="form-control" ng-model="firstName" placeholder="Enter name..">
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" ng-click="filterPersons(firstName)">Go</button>
+						</span>
+					</div>
+				</form>
+				<ul>
+					<li ng-repeat="person in persons_filtered"><a href="#" ng-click="changePerson(person.id);">{{ person.full_name }}</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-md-8">
+			<div ng-if="person">
+				<div class="panel panel-default">
+					<div class="panel-heading"><h4>{{ person.full_name }}</h4></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-6">
+								<div class="col-md-6">First name: <strong>{{ person.firstName }}</strong></div>
+								<div class="col-md-6">Age: <strong>{{ person.age }}</strong></div>
+								<div class="col-md-6">Last name: <strong>{{ person.surname }}</strong></div>
+								<div class="col-md-6">Gender: <strong>{{ person.gender }}</strong></div>
+							</div>
+						</div>
+						<br><br>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="col-md-4">
+									<h4>Friends: <span class="badge">{{ person.friends.length }}</span></h4>
+									<ul>
+										<li ng-repeat="f in person.friends" ng-init="friend = getPersonById(f)"><a href="#" ng-click="changePerson(friend.id);">{{ friend.full_name }}</a></li>
+									</ul>
+								</div>
+								<div class="col-md-4">
+									<h4>Friends of friends: <span class="badge">{{ person.friends_of_friends.length }}</span></h4>
+									<ul>
+										<li ng-repeat="f in person.friends_of_friends" ng-init="fof = getPersonById(f)"><a href="#" ng-click="changePerson(fof.id);">{{ fof.full_name }}</a></li>
+									</ul>
+								</div>
+								<div class="col-md-4">
+									<h4>Suggested friends: <span class="badge">{{ person.suggested_friends.length }}</span></h4>
+									<ul>
+										<li ng-repeat="f in person.suggested_friends" ng-init="sf = getPersonById(f)"><a href="#" ng-click="changePerson(sf.id);">{{ sf.full_name }}</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="addModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">Add new person</h4>
+				</div>
+				<div class="modal-body">
+					<div class="alert alert-success" ng-if="modal_error == false">
+						<p>Success.</p>
+					</div>
+					<div class="alert alert-danger" ng-if="modal_error">
+						<ul>
+							<li ng-repeat="(field, msgs) in modal_error">
+								{{ field }}
+								<ul>
+									<li ng-repeat="msg in msgs">{{ msg }}</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+					<form ng-submit="savePerson(new_person)">
+						<label for="id_firstName">First name:</label>
+						<input type="text" id="id_firstName" class="form-control" ng-model="new_person.firstName">
+						<label for="id_surname">Surname:</label>
+						<input type="text" id="id_surname" class="form-control" ng-model="new_person.surname">
+						<label for="id_age">Age:</label>
+						<input type="number" id="id_age" class="form-control" ng-model="new_person.age">
+						<label for="id_gender">Gender:</label>
+						<select id="id_gender" class="form-control" ng-model="new_person.gender">
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+						</select>
+						<label for="id_friends">Friends:</label>
+						<select id="id_friends" class="form-control" ng-model="new_person.friends" multiple>
+							<option ng-repeat="p in persons" value="{{ p.id }}">{{ p.full_name }}</option>
+						</select>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" ng-click="savePerson(new_person)">Add</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% endverbatim %}
+	<script src="{% static 'js/jquery.min.js' %}"></script>
+	<script src="{% static 'js/bootstrap.min.js' %}"></script>
+	<script src="{% static 'js/angular.min.js' %}"></script>
+	<script src="{% static 'js/app/app.js' %}"></script>
+	<script src="{% static 'js/app/controllers.js' %}"></script>
+</body>
+</html>
