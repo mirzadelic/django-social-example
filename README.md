@@ -5,8 +5,8 @@ Python/Django framework with SQLite, RESTful API(django rest framework) and Angu
 Persons data are loaded from `data.txt` file.
 
 ## Example images
-![List persons](https://raw.github.com/mirzadelic1/django-social-example/master/Screenshots/img1.png)
-![Add person](https://raw.github.com/mirzadelic1/django-social-example/master/Screenshots/img2.png)
+![List persons](https://github.com/mirzadelic/django-social-example/raw/master/Screenshots/img1.png)
+![Add person](https://github.com/mirzadelic/django-social-example/raw/master/Screenshots/img2.png)
 
 
 ### Requirements
